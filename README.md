@@ -21,6 +21,7 @@
 
 <p align="center">
   <a href="#-核心原则">核心原则</a> ·
+  <a href="#-小红书-minitool-容器能力速览">MiniTool 能力</a> ·
   <a href="#-快速开始">快速开始</a> ·
   <a href="#-迁移工作流">迁移工作流</a> ·
   <a href="#-能力替代矩阵">能力替代矩阵</a> ·
@@ -54,6 +55,48 @@
 <p align="center">
   <img src="docs/assets/workflow.svg" alt="Migration Workflow" width="100%">
 </p>
+
+---
+
+## 📱 小红书 MiniTool 容器能力速览
+
+> 官方基线：**2026-08-11**。更完整说明可参考官方视频：
+> [小红书小工具容器能力介绍](https://fe-video-qc.xhscdn.com/fe-platform-file/104101b8323q4m0uaga06277180ac7t8006ptl0e12ek1g#s1)
+
+MiniTool 是一个**受限沙箱中的纯 Web 应用**：HTML/CSS/JS，iOS/Android 双端隔离运行，**纯本地、不联网**。迁移目标就是把微信项目装进这个沙箱，同时尽可能保住用户目标。
+
+### ✅ 官方明确支持（可进入主流程）
+
+- HTML5 / CSS3 / Flex / Grid / 动画 / 媒体查询
+- Canvas 2D 与纯 WebGL/WebGL2
+- `getUserMedia` 摄像头 / 麦克风
+- `<input type=file>` 系统选择图片 / 视频
+- `<audio>` / `<video>` 内联播放
+- localStorage / sessionStorage / IndexedDB / Cookie / Cache API
+- `alert` / `confirm`
+- 包内图片、字体、JSON，以及 `data:` / `blob:` 图片（客户端 9.37+）
+
+### 🔌 官方 Native API（仅 3 个）
+
+```js
+window.xhs.miniTool.postNote              // 发笔记：1-18 张图或单视频
+window.xhs.miniTool.saveImageToPhotosAlbum // 保存图片到相册
+window.xhs.miniTool.writeTempFile          // 写入临时文件
+```
+
+未列出的 API **不可依赖**，也不要自行通过 `postMessage` 绕过 bridge。
+
+### ❌ 明确禁用（不能探测后强行绕过）
+
+- `fetch` / `XMLHttpRequest` / WebSocket / WebRTC
+- Geolocation / 蓝牙 / USB / HID / 传感器
+- Worker / WASM / `eval` / `new Function`
+- iframe / object / 外链 / 新窗口 / 跳其他小工具
+- PaymentRequest / 系统通知 / NFC / XR 等移动 WebView 能力
+
+### 🧪 STANDARD_WEB_PROBE
+
+官方未逐项承诺的标准 Web API，可以 `feature-detect` 后作为**增强**，但必须有 fallback，不能作为核心任务的唯一路径。
 
 ---
 
