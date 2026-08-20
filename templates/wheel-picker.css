@@ -1,0 +1,192 @@
+/* XHS MiniTool wheel picker — WeChat-like bottom picker visual.
+ * Classic offline Web implementation. No native <select>/<input type=date> UI.
+ */
+.xhs-wheel-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 420;
+  pointer-events: none;
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", Arial, sans-serif;
+  -webkit-tap-highlight-color: transparent;
+}
+.xhs-wheel-layer[hidden] { display: none; }
+.xhs-wheel-layer.is-open { pointer-events: auto; }
+
+.xhs-wheel-mask {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, .38);
+  opacity: 0;
+  transition: opacity .18s ease;
+}
+.xhs-wheel-layer.is-open .xhs-wheel-mask { opacity: 1; }
+
+.xhs-wheel-sheet {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  box-sizing: border-box;
+  padding-bottom: max(env(safe-area-inset-bottom), 8px);
+  border-radius: 18px 18px 0 0;
+  background: #fff;
+  box-shadow: 0 -10px 36px rgba(0, 0, 0, .10);
+  transform: translateY(102%);
+  transition: transform .22s cubic-bezier(.22, .72, .24, 1);
+  overflow: hidden;
+}
+.xhs-wheel-layer.is-open .xhs-wheel-sheet { transform: translateY(0); }
+
+/* WeChat picker does not need a decorative drag handle. Keep hidden if older markup exists. */
+.xhs-wheel-grabber { display: none !important; }
+
+.xhs-wheel-toolbar {
+  position: relative;
+  box-sizing: border-box;
+  height: 56px;
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr) 64px;
+  align-items: center;
+  padding: 0 18px;
+  background: #fff;
+  border-bottom: 1px solid rgba(0, 0, 0, .08);
+}
+.xhs-wheel-toolbar-btn {
+  box-sizing: border-box;
+  min-width: 44px;
+  height: 44px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  font-size: 16px;
+  line-height: 44px;
+  font-weight: 400;
+  white-space: nowrap;
+  appearance: none;
+  -webkit-appearance: none;
+}
+.xhs-wheel-toolbar-btn.cancel {
+  justify-self: start;
+  text-align: left;
+  color: #6b7280;
+}
+.xhs-wheel-toolbar-btn.confirm {
+  justify-self: end;
+  text-align: right;
+  color: #7659c9;
+  font-weight: 600;
+}
+.xhs-wheel-title {
+  min-width: 0;
+  padding: 0 8px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: center;
+  color: #1f2937;
+  font-size: 17px;
+  line-height: 24px;
+  font-weight: 600;
+}
+
+.xhs-wheel-columns {
+  --xhs-wheel-item-h: 44px;
+  position: relative;
+  box-sizing: border-box;
+  height: 220px;
+  display: flex;
+  padding: 0 16px;
+  background: #fff;
+  overflow: hidden;
+}
+/* Center selection indicator: same restrained top/bottom rules as WeChat picker-view. */
+.xhs-wheel-columns::before {
+  content: "";
+  position: absolute;
+  z-index: 3;
+  left: 16px;
+  right: 16px;
+  top: 88px;
+  height: 44px;
+  box-sizing: border-box;
+  border-top: 1px solid rgba(0, 0, 0, .08);
+  border-bottom: 1px solid rgba(0, 0, 0, .08);
+  background: rgba(247, 248, 250, .62);
+  pointer-events: none;
+}
+/* Fade non-selected rows instead of showing a large flat blank panel. */
+.xhs-wheel-columns::after {
+  content: "";
+  position: absolute;
+  z-index: 4;
+  inset: 0 16px;
+  pointer-events: none;
+  background:
+    linear-gradient(to bottom,
+      rgba(255,255,255,.96) 0,
+      rgba(255,255,255,.46) 48px,
+      rgba(255,255,255,0) 82px,
+      rgba(255,255,255,0) 138px,
+      rgba(255,255,255,.46) 172px,
+      rgba(255,255,255,.96) 220px);
+}
+
+.xhs-wheel-column {
+  --xhs-wheel-pad: 88px;
+  position: relative;
+  z-index: 2;
+  flex: 1 1 0;
+  min-width: 0;
+  height: 220px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  box-sizing: border-box;
+  padding: var(--xhs-wheel-pad) 0;
+  scroll-snap-type: y mandatory;
+  overscroll-behavior-y: contain;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+}
+.xhs-wheel-column::-webkit-scrollbar { display: none; }
+.xhs-wheel-item {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  height: 44px;
+  margin: 0;
+  padding: 0 8px;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: #9aa1ad;
+  font-size: 16px;
+  line-height: 44px;
+  font-weight: 400;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  scroll-snap-align: center;
+  appearance: none;
+  -webkit-appearance: none;
+  transition: color .12s ease, transform .12s ease, font-weight .12s ease;
+}
+.xhs-wheel-item.is-selected {
+  color: #111827;
+  font-size: 18px;
+  font-weight: 600;
+  transform: scale(1.01);
+}
+
+@media (min-width: 520px) {
+  .xhs-wheel-sheet {
+    left: 50%;
+    right: auto;
+    width: min(480px, calc(100vw - 32px));
+    transform: translate(-50%, 102%);
+  }
+  .xhs-wheel-layer.is-open .xhs-wheel-sheet { transform: translate(-50%, 0); }
+}
