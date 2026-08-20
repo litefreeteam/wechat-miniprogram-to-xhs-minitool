@@ -7,67 +7,77 @@
     <filter id="mshadow">
       <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#000" flood-opacity="0.3"/>
     </filter>
+    <style>
+      .cm-title { font-family: 'PingFang SC', 'Microsoft YaHei', 'Noto Sans SC', 'Hiragino Sans GB', system-ui, -apple-system, sans-serif; }
+      .cm-text { font-family: 'PingFang SC', 'Microsoft YaHei', 'Noto Sans SC', 'Hiragino Sans GB', system-ui, -apple-system, sans-serif; }
+      .cm-mono { font-family: 'SF Mono', 'Fira Code', 'PingFang SC', 'Microsoft YaHei', monospace; }
+      .arrow { fill: none; stroke: #fff; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+      .check { fill: none; stroke: #86efac; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+      .cross { fill: none; stroke: #fca5a5; stroke-width: 2.5; stroke-linecap: round; }
+    </style>
   </defs>
   
   <rect width="1000" height="520" fill="url(#bgm)" rx="16"/>
   
-  <text x="500" y="45" text-anchor="middle" fill="#fff" font-family="system-ui" font-size="22" font-weight="700">微信能力 → 小红书 MiniTool 替代策略</text>
-  <text x="500" y="70" text-anchor="middle" fill="#94a3b8" font-family="system-ui" font-size="13">不是所有能力都丢失，关键是如何诚实保留用户目标</text>
+  <text x="350" y="45" text-anchor="end" fill="#fff" class="cm-title" font-size="22" font-weight="700">微信能力</text>
+  <path d="M370 38 L420 38 L412 32 M420 38 L412 44" class="arrow"/>
+  <text x="430" y="45" text-anchor="start" fill="#fff" class="cm-title" font-size="22" font-weight="700">小红书 MiniTool 替代策略</text>
   
-  <!-- Table header -->
+  <text x="500" y="70" text-anchor="middle" fill="#94a3b8" class="cm-text" font-size="13">不是所有能力都丢失，关键是如何诚实保留用户目标</text>
+  
   <rect x="60" y="100" width="260" height="45" rx="8" fill="#334155"/>
   <rect x="330" y="100" width="310" height="45" rx="8" fill="#334155"/>
   <rect x="650" y="100" width="290" height="45" rx="8" fill="#334155"/>
   
-  <text x="190" y="128" text-anchor="middle" fill="#e2e8f0" font-family="system-ui" font-size="14" font-weight="700">微信能力</text>
-  <text x="485" y="128" text-anchor="middle" fill="#e2e8f0" font-family="system-ui" font-size="14" font-weight="700">替代 / 重写策略</text>
-  <text x="795" y="128" text-anchor="middle" fill="#e2e8f0" font-family="system-ui" font-size="14" font-weight="700">结果</text>
+  <text x="190" y="128" text-anchor="middle" fill="#e2e8f0" class="cm-title" font-size="14" font-weight="700">微信能力</text>
+  <text x="485" y="128" text-anchor="middle" fill="#e2e8f0" class="cm-title" font-size="14" font-weight="700">替代 / 重写策略</text>
+  <text x="795" y="128" text-anchor="middle" fill="#e2e8f0" class="cm-title" font-size="14" font-weight="700">结果</text>
   
-  <!-- Row 1 -->
   <rect x="60" y="155" width="260" height="50" rx="8" fill="#1e293b" stroke="#334155"/>
   <rect x="330" y="155" width="310" height="50" rx="8" fill="#1e293b" stroke="#334155"/>
   <rect x="650" y="155" width="290" height="50" rx="8" fill="#1e293b" stroke="#334155"/>
-  <text x="75" y="185" fill="#7dd3fc" font-family="system-ui" font-size="13" font-weight="600">wx.login / openid</text>
-  <text x="345" y="185" fill="#e2e8f0" font-family="system-ui" font-size="13">本地 installId，明确非平台账号</text>
-  <text x="665" y="185" fill="#86efac" font-family="system-ui" font-size="13">✓ 本机进度保留</text>
+  <text x="75" y="185" fill="#7dd3fc" class="cm-mono" font-size="13" font-weight="600">wx.login / openid</text>
+  <text x="345" y="185" fill="#e2e8f0" class="cm-text" font-size="13">本地 installId，明确非平台账号</text>
+  <path d="M670 178 L677 185 L690 172" class="check"/>
+  <text x="700" y="185" fill="#86efac" class="cm-text" font-size="13">本机进度保留</text>
   
-  <!-- Row 2 -->
   <rect x="60" y="215" width="260" height="50" rx="8" fill="#1e293b" stroke="#334155"/>
   <rect x="330" y="215" width="310" height="50" rx="8" fill="#1e293b" stroke="#334155"/>
   <rect x="650" y="215" width="290" height="50" rx="8" fill="#1e293b" stroke="#334155"/>
-  <text x="75" y="245" fill="#7dd3fc" font-family="system-ui" font-size="13" font-weight="600">wx.request 固定配置</text>
-  <text x="345" y="245" fill="#e2e8f0" font-family="system-ui" font-size="13">snapshot_remote_json 构建期快照</text>
-  <text x="665" y="245" fill="#86efac" font-family="system-ui" font-size="13">✓ 离线数据可用</text>
+  <text x="75" y="245" fill="#7dd3fc" class="cm-text" font-size="13" font-weight="600">wx.request 固定配置</text>
+  <text x="345" y="245" fill="#e2e8f0" class="cm-mono" font-size="13">snapshot_remote_json 构建期快照</text>
+  <path d="M670 238 L677 245 L690 232" class="check"/>
+  <text x="700" y="245" fill="#86efac" class="cm-text" font-size="13">离线数据可用</text>
   
-  <!-- Row 3 -->
   <rect x="60" y="275" width="260" height="50" rx="8" fill="#1e293b" stroke="#334155"/>
   <rect x="330" y="275" width="310" height="50" rx="8" fill="#1e293b" stroke="#334155"/>
   <rect x="650" y="275" width="290" height="50" rx="8" fill="#1e293b" stroke="#334155"/>
-  <text x="75" y="305" fill="#7dd3fc" font-family="system-ui" font-size="13" font-weight="600">OSS/CDN 图片字体</text>
-  <text x="345" y="305" fill="#e2e8f0" font-family="system-ui" font-size="13">localize_remote_assets 下载到包内</text>
-  <text x="665" y="305" fill="#86efac" font-family="system-ui" font-size="13">✓ 断网自包含</text>
+  <text x="75" y="305" fill="#7dd3fc" class="cm-text" font-size="13" font-weight="600">OSS/CDN 图片字体</text>
+  <text x="345" y="305" fill="#e2e8f0" class="cm-mono" font-size="13">localize_remote_assets 下载到包内</text>
+  <path d="M670 298 L677 305 L690 292" class="check"/>
+  <text x="700" y="305" fill="#86efac" class="cm-text" font-size="13">断网自包含</text>
   
-  <!-- Row 4 -->
   <rect x="60" y="335" width="260" height="50" rx="8" fill="#1e293b" stroke="#334155"/>
   <rect x="330" y="335" width="310" height="50" rx="8" fill="#1e293b" stroke="#334155"/>
   <rect x="650" y="335" width="290" height="50" rx="8" fill="#1e293b" stroke="#334155"/>
-  <text x="75" y="365" fill="#7dd3fc" font-family="system-ui" font-size="13" font-weight="600">picker / date picker</text>
-  <text x="345" y="365" fill="#e2e8f0" font-family="system-ui" font-size="13">wheel-picker.js 底部滚轮 Sheet</text>
-  <text x="665" y="365" fill="#86efac" font-family="system-ui" font-size="13">✓ 原生级体验</text>
+  <text x="75" y="365" fill="#7dd3fc" class="cm-text" font-size="13" font-weight="600">picker / date picker</text>
+  <text x="345" y="365" fill="#e2e8f0" class="cm-mono" font-size="13">wheel-picker.js 底部滚轮 Sheet</text>
+  <path d="M670 358 L677 365 L690 352" class="check"/>
+  <text x="700" y="365" fill="#86efac" class="cm-text" font-size="13">原生级体验</text>
   
-  <!-- Row 5 -->
   <rect x="60" y="395" width="260" height="50" rx="8" fill="#1e293b" stroke="#334155"/>
   <rect x="330" y="395" width="310" height="50" rx="8" fill="#1e293b" stroke="#334155"/>
   <rect x="650" y="395" width="290" height="50" rx="8" fill="#1e293b" stroke="#334155"/>
-  <text x="75" y="425" fill="#7dd3fc" font-family="system-ui" font-size="13" font-weight="600">云函数 / 云存档</text>
-  <text x="345" y="425" fill="#e2e8f0" font-family="system-ui" font-size="13">IndexedDB / localStorage 本地化</text>
-  <text x="665" y="425" fill="#86efac" font-family="system-ui" font-size="13">✓ 仅本机，诚实提示</text>
+  <text x="75" y="425" fill="#7dd3fc" class="cm-text" font-size="13" font-weight="600">云函数 / 云存档</text>
+  <text x="345" y="425" fill="#e2e8f0" class="cm-text" font-size="13">IndexedDB / localStorage 本地化</text>
+  <path d="M670 418 L677 425 L690 412" class="check"/>
+  <text x="700" y="425" fill="#86efac" class="cm-text" font-size="13">仅本机，诚实提示</text>
   
-  <!-- Row 6 -->
   <rect x="60" y="455" width="260" height="50" rx="8" fill="#1e293b" stroke="#334155"/>
   <rect x="330" y="455" width="310" height="50" rx="8" fill="#1e293b" stroke="#334155"/>
   <rect x="650" y="455" width="290" height="50" rx="8" fill="#1e293b" stroke="#334155"/>
-  <text x="75" y="485" fill="#7dd3fc" font-family="system-ui" font-size="13" font-weight="600">实时联网 / 支付 / 蓝牙</text>
-  <text x="345" y="485" fill="#e2e8f0" font-family="system-ui" font-size="13">HARD_BLOCK — 不伪造</text>
-  <text x="665" y="485" fill="#fca5a5" font-family="system-ui" font-size="13">✗ 明确阻断</text>
+  <text x="75" y="485" fill="#7dd3fc" class="cm-text" font-size="13" font-weight="600">实时联网 / 支付 / 蓝牙</text>
+  <text x="345" y="485" fill="#e2e8f0" class="cm-text" font-size="13">HARD_BLOCK — 不伪造</text>
+  <path d="M672 472 L688 488 M688 472 L672 488" class="cross"/>
+  <text x="700" y="485" fill="#fca5a5" class="cm-text" font-size="13">明确阻断</text>
 </svg>
