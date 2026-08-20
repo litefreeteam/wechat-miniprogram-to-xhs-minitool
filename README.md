@@ -7,7 +7,7 @@
 </h1>
 
 <p align="center">
-  <b>微信小程序 / 微信小游戏 → 小红书 MiniTool 离线 H5 ZIP</b><br>
+  <b>微信小程序 / 微信小游戏 → 小红书 MiniTool（小红书小工具）离线 H5 ZIP</b><br>
   <i>Maximum-Availability Migration Engine · 最大可用迁移引擎</i>
 </p>
 
@@ -21,7 +21,7 @@
 
 <p align="center">
   <a href="#-核心原则">核心原则</a> ·
-  <a href="#-小红书-minitool-容器能力速览">MiniTool 能力</a> ·
+  <a href="#-小红书-minitool小红书小工具-容器能力速览">小红书小工具能力</a> ·
   <a href="#-快速开始">快速开始</a> ·
   <a href="#-迁移工作流">迁移工作流</a> ·
   <a href="#-能力替代矩阵">能力替代矩阵</a> ·
@@ -35,7 +35,7 @@
 
 > **不是“严格阻断优先”，而是“最大可用优先”。**
 
-当微信小程序进入小红书 MiniTool 的严苛容器时，第一反应不应该是删除功能，而是追问：
+当微信小程序迁移到小红书 MiniTool（小红书小工具）的严苛容器时，第一反应不应该是删除功能，而是追问：
 
 ```text
 用户真正想完成的事，能否通过另一条诚实路径保留？
@@ -58,12 +58,12 @@
 
 ---
 
-## 📱 小红书 MiniTool 容器能力速览
+## 📱 小红书 MiniTool（小红书小工具）容器能力速览
 
 > 官方基线：**2026-08-11**。更完整说明可参考官方视频：
 > [小红书小工具容器能力介绍](https://fe-video-qc.xhscdn.com/fe-platform-file/104101b8323q4m0uaga06277180ac7t8006ptl0e12ek1g#s1)
 
-MiniTool 是一个**受限沙箱中的纯 Web 应用**：HTML/CSS/JS，iOS/Android 双端隔离运行，**纯本地、不联网**。迁移目标就是把微信项目装进这个沙箱，同时尽可能保住用户目标。
+小红书小工具（MiniTool）是一个**受限沙箱中的纯 Web 应用**：HTML/CSS/JS，iOS/Android 双端隔离运行，**纯本地、不联网**。迁移目标就是把微信项目装进这个沙箱，同时尽可能保住用户目标。
 
 ### ✅ 官方明确支持（可进入主流程）
 
@@ -271,7 +271,7 @@ if (MiniToolCapabilities.vibrateSymbol) {
 
 ## 📦 产物规范
 
-最终 `tool.zip` 必须满足：
+最终输出到小红书小工具的 `tool.zip` 必须满足：
 
 - 一个 `index.html`
 - 包内 HTML / CSS / classic JS
