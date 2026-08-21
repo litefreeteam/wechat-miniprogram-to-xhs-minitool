@@ -171,6 +171,7 @@ scripts/
 ├── snapshot_remote_json.py         # 远程 JSON 构建期快照
 ├── materialize_static_json.py      # 本地 JSON 转 classic JS
 ├── embed_media_as_js.py            # 媒体文件 base64 内联 fallback
+├── transform_native_shell.py       # 删除微信自绘返回键/导航栏/状态栏占位
 ├── convert_rpx.py                  # rpx → px/rem 转换
 ├── analyze_assets.py               # 产物资源分析
 ├── validate_xhs_minitool.py        # MiniTool 离线合规校验

@@ -269,6 +269,18 @@ MiniTool 容器自身提供左上角返回控件。迁移微信 `navigationStyle
 
 扫描器发现 `aria-label="返回"`、常见 `*-nav-back/*-back-button` 且绑定 `wx.navigateBack` 时，应标记 `PRODUCT_REWRITE`：删除宿主级返回 UI，保留内部 history 语义。
 
+可先用自动脚本处理大部分机械删除：
+
+```bash
+python3 scripts/transform_native_shell.py /path/to/project --output-root /tmp/xhs-migration-workspace
+```
+
+该脚本会：
+- 删除 WXML/WXSS 里的自绘返回按钮、自定义导航栏、状态栏占位；
+- 移除 JSON 里的 `navigationStyle: custom`、`navigationBarBackgroundColor`、`navigationBarTextStyle`；
+- 把 `wx.navigateBack` 替换为 `history.back()`；
+- 保留业务级“返回首页 / 返回计算”等 CTA。
+
 ### B. 微信 selector picker → 底部滚轮 Sheet
 
 不要直接把 `<picker mode="selector">` 转成可见 `<select>`。移动 WebView 的原生 `<select>` 高度、样式和系统差异不可控，且与微信体验差异明显。
