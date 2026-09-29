@@ -22,7 +22,7 @@
 可以：
 
 - openid 只用于本机存档 key → 本地 installId；
-- 云数据库只保存游戏进度 → IndexedDB；
+- 云数据库只保存游戏进度 → XHS Storage（9.46+）/文件系统（9.49+），旧客户端降级 IndexedDB；
 - 在线排行只用于激励 → 本机最好成绩/预置挑战目标；
 - 云配置很少变化 → 构建期 snapshot；
 - 用户头像只是装饰 → 用户本地选图。
@@ -45,7 +45,8 @@ MiniTool 运行时不能联网/WASM/Worker，但迁移/构建阶段可以做大�
 - 把固定 PDF/文档转图片/HTML；
 - 把有限输入的计算结果预生成查表；
 - 把远程网页的固定内容迁成本地 HTML（需有授权）；
-- 把动态 URL 可枚举集合生成 asset map。
+- 把动态 URL 可枚举集合生成 asset map；
+- 把源码转译到 ES2017/Chrome 61（Babel/SWC target: chrome 61），消除可选链等 ES2018+ 语法。
 
 这类方案能显著减少 HARD_BLOCK。
 

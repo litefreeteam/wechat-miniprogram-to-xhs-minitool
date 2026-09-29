@@ -73,16 +73,16 @@ API_MAP = {
     'openEmbeddedMiniProgram': ('HARD_BLOCK', '不可嵌入/跳转其他小工具'),
 
     # File/storage
-    'getFileSystemManager': ('ADAPT', '按用途拆分：持久业务数据→IndexedDB/localStorage；用户文件→File/Blob；生成媒体→writeTempFile；文档下载/任意文件系统不可保留'),
-    'setStorageSync': ('PRESERVE', 'localStorage.setItem + JSON 序列化'),
-    'getStorageSync': ('PRESERVE', 'localStorage.getItem + JSON 反序列化'),
-    'removeStorageSync': ('PRESERVE', 'localStorage.removeItem'),
-    'clearStorageSync': ('PRESERVE', 'localStorage.clear'),
-    'setStorage': ('ADAPT', '用 localStorage/IndexedDB 包装异步接口'),
-    'getStorage': ('ADAPT', '用 localStorage/IndexedDB 包装异步接口'),
-    'removeStorage': ('ADAPT', 'localStorage/IndexedDB'),
-    'clearStorage': ('ADAPT', 'localStorage/IndexedDB'),
-    'saveFile': ('ADAPT', '若是业务持久数据改 IndexedDB；若是用户导出文件，普通下载被禁，优先转成图片并保存/发笔记'),
+    'getFileSystemManager': ('ADAPT', '9.49+ 用 XHS 文件系统(writeFile/readFile/mkdir 等,根目录 userDataPath,带版本探测)；旧客户端按用途拆 File/Blob/IndexedDB；生成媒体→writeTempFile；文档下载/任意文件系统不可保留'),
+    'setStorageSync': ('ADAPT', '优先 xhs.miniTool.setStorage(9.46+,data 为 JSON 字符串)；旧客户端降级 localStorage.setItem'),
+    'getStorageSync': ('ADAPT', '优先 xhs.miniTool.getStorage(9.46+)；旧客户端降级 localStorage.getItem；浏览器存储不承诺生命周期,须容错'),
+    'removeStorageSync': ('ADAPT', 'xhs.miniTool.removeStorage(9.46+)/localStorage'),
+    'clearStorageSync': ('ADAPT', 'xhs.miniTool.clearStorage(9.46+)/localStorage.clear'),
+    'setStorage': ('ADAPT', 'xhs.miniTool.setStorage(9.46+,异步语义一致)；旧客户端 localStorage/IndexedDB 兜底'),
+    'getStorage': ('ADAPT', 'xhs.miniTool.getStorage(9.46+)；旧客户端 localStorage/IndexedDB 兜底'),
+    'removeStorage': ('ADAPT', 'xhs.miniTool.removeStorage(9.46+)/IndexedDB'),
+    'clearStorage': ('ADAPT', 'xhs.miniTool.clearStorage(9.46+)/IndexedDB'),
+    'saveFile': ('ADAPT', '9.49+ 用 xhs.miniTool.saveFile 持久化临时文件；旧客户端业务数据改 IndexedDB；用户导出文件下载被禁，优先转图片保存/发笔记'),
     'openDocument': ('PRECOMPUTE', '固定 PDF/文档可在构建期转图片/HTML；运行时任意文档打开不可保留'),
 
     # Media/canvas
@@ -92,7 +92,7 @@ API_MAP = {
     'saveImageToPhotosAlbum': ('PRESERVE', 'window.xhs.miniTool.saveImageToPhotosAlbum；必须用户手势'),
     'canvasToTempFilePath': ('ADAPT', 'canvas.toDataURL → xhs.miniTool.writeTempFile'),
     'createCanvasContext': ('PRESERVE', 'DOM canvas.getContext("2d")'),
-    'createOffscreenCanvas': ('ADAPT', '不要依赖 Worker 组合；优先普通主线程 Canvas；仅无 Worker 方案可探测'),
+    'createOffscreenCanvas': ('ADAPT', '容器明确禁止 OffscreenCanvas 离屏作业；改主线程普通 Canvas 分片渲染'),
     'getImageInfo': ('PRESERVE', 'Image/File/Blob + decode/load'),
     'previewImage': ('ADAPT', '自绘 lightbox/全视口预览，不调用 requestFullscreen'),
     'compressImage': ('PRESERVE', 'Canvas 缩放/重编码'),
@@ -124,7 +124,7 @@ API_MAP = {
 }
 
 PREFIX_RULES = {
-    'cloud.': ('PRODUCT_REWRITE', '云函数若是纯确定性计算→迁到客户端；固定数据/素材→快照/本地化；CRUD→IndexedDB 本地化；真实后端/鉴权/实时同步→HARD_BLOCK'),
+    'cloud.': ('PRODUCT_REWRITE', '云函数若是纯确定性计算→迁到客户端；固定数据/素材→快照/本地化；CRUD→XHS Storage(9.46+)/IndexedDB 本地化；真实后端/鉴权/实时同步→HARD_BLOCK'),
     'onAccelerometer': ('HARD_BLOCK', '传感器被明确禁用；游戏可改触摸/滑杆/按钮控制'),
     'startAccelerometer': ('HARD_BLOCK', '传感器被明确禁用；改触摸/滑杆'),
     'stopAccelerometer': ('HARD_BLOCK', '传感器被明确禁用'),
@@ -273,7 +273,7 @@ def main():
             add_issue(issues, 'REVIEW', 'config', 'app.json', 1, 'app.json', f'无法解析 JSON: {e}')
 
     for dirname, status, advice in [
-        ('cloudfunctions', 'PRODUCT_REWRITE', '逐个云函数分类：纯计算移客户端；固定数据/素材快照；本地 CRUD 用 IndexedDB；真实后端能力才 HARD_BLOCK'),
+        ('cloudfunctions', 'PRODUCT_REWRITE', '逐个云函数分类：纯计算移客户端；固定数据/素材快照；本地 CRUD 用 XHS Storage(9.46+)/IndexedDB；真实后端能力才 HARD_BLOCK'),
         ('workers', 'ADAPT', 'Worker 改主线程分片执行或构建期预计算'),
         ('miniprogram_npm', 'ADAPT', '从 package.json/源码重新 bundle，不直接搬微信构建产物'),
     ]:
@@ -344,7 +344,7 @@ def main():
 
         mm = re.search(r'\bwx\.env\.USER_DATA_PATH\b|\bwxfile://|\bhttp://tmp/', text, re.I)
         if mm:
-            add_issue(issues, 'ADAPT', 'file-path', rel, line_number(text, mm.start()), mm.group(0), 'File/Blob/IndexedDB/data URL/writeTempFile 按用途拆分')
+            add_issue(issues, 'ADAPT', 'file-path', rel, line_number(text, mm.start()), mm.group(0), 'File/Blob/XHS Storage·文件系统(版本探测)/data URL/writeTempFile 按用途拆分')
         mm = re.search(r'\bcloud://', text, re.I)
         if mm:
             add_issue(issues, 'LOCALIZE', 'cloud-resource', rel, line_number(text, mm.start()), 'cloud://', '固定公共素材迁移前导出并本地化；动态用户云资源改本地选图/占位或 HARD_BLOCK')

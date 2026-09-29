@@ -16,11 +16,12 @@
 
 `wxfile://` / `USER_DATA_PATH`：
 
-- 业务数据 → Storage/IndexedDB
-- 用户选择 → File/Blob
+- 业务数据 → XHS Storage（9.46+）；旧客户端降级 IndexedDB/localStorage（弱兼容兜底，须容错）
+- 持久文件 → XHS 文件系统（9.49+，根目录 `miniToolEnv.userDataPath`，注意清档可能遗失、核心资产需可重建）
+- 用户选择 → File/Blob（容器只放行图片/视频）
 - 图片预览 → blob/data
 - Canvas 结果 → data URL
-- XHS Native 媒体 → writeTempFile 即用即弃
+- XHS Native 媒体 → writeTempFile 即用即弃，路径有时效性不要固化
 
 ## 生命周期
 
@@ -28,7 +29,7 @@
 
 ## Canvas / 微信小游戏
 
-Canvas 2D/纯 WebGL 是优先保留路线。重点处理：本地纹理、DPR、Pointer/Touch、主线程性能、WASM/Worker 前移构建期。
+Canvas 2D/纯 WebGL 是优先保留路线。重点处理：本地纹理、DPR、Pointer/Touch、主线程性能、WASM/Worker 前移构建期。官方新文档明确：禁止外部域贴图载入纹理、禁止 OffscreenCanvas 离屏作业与 SharedArrayBuffer 并发；重度 AI 推理不可部署（有限输入可构建期预计算）。
 
 ## WASM/Worker
 

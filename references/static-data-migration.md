@@ -53,5 +53,5 @@ window.AppStaticData.items = [...];
 
 - 纯确定性逻辑 → 搬客户端；
 - 有限输入 → 构建期 PRECOMPUTE 为 lookup table；
-- 用户本机 CRUD → IndexedDB；
+- 用户本机 CRUD → XHS Storage（9.46+）；旧客户端降级 IndexedDB；
 - 必须私密密钥/服务端权限/实时数据 → HARD_BLOCK。

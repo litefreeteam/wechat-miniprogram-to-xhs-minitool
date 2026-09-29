@@ -14,7 +14,22 @@ TRASH_NAMES = {'.DS_Store', 'Thumbs.db'}
 TRASH_PARTS = {'node_modules', '.git', '__MACOSX', '.idea', '.vscode'}
 TRASH_SUFFIXES = {'.map'}
 TEXT_EXTS = {'.html', '.css', '.js', '.json'}
-XHS_ALLOWED_APIS = {'postNote', 'saveImageToPhotosAlbum', 'writeTempFile'}
+XHS_ALLOWED_APIS = {
+    # baseline
+    'postNote', 'saveImageToPhotosAlbum', 'writeTempFile', 'getLaunchOptions',
+    # 9.46.0+ storage
+    'setStorage', 'getStorage', 'getStorageInfo', 'removeStorage', 'clearStorage',
+    # 9.49.0+ file system & interaction
+    'saveFile', 'writeFile', 'appendFile', 'readFile', 'readDir',
+    'statFile', 'unlink', 'mkdir', 'getFileStorageInfo', 'interactionOpenApi',
+}
+XHS_VERSION_GATED_APIS = {
+    'setStorage': 9460, 'getStorage': 9460, 'getStorageInfo': 9460,
+    'removeStorage': 9460, 'clearStorage': 9460,
+    'saveFile': 9490, 'writeFile': 9490, 'appendFile': 9490, 'readFile': 9490,
+    'readDir': 9490, 'statFile': 9490, 'unlink': 9490, 'mkdir': 9490,
+    'getFileStorageInfo': 9490, 'interactionOpenApi': 9490,
+}
 
 CHECKS = [
     ('ERROR', r'\bfetch\s*\(', '禁止 fetch/网络请求'),
@@ -28,12 +43,27 @@ CHECKS = [
     ('ERROR', r'DeviceMotionEvent|DeviceOrientationEvent|\b(?:Accelerometer|Gyroscope|Magnetometer)\s*\(', '禁止传感器 API'),
     ('ERROR', r'\bnew\s+(?:Shared)?Worker\s*\(|serviceWorker', '禁止 Worker/ServiceWorker'),
     ('ERROR', r'\bWebAssembly\b|\.wasm\b', '禁止 WebAssembly/WASM'),
+    ('ERROR', r'\bOffscreenCanvas\b', '容器明确禁止 OffscreenCanvas 离屏作业'),
+    ('ERROR', r'\bSharedArrayBuffer\b', '容器明确禁止 SharedArrayBuffer 并发模型'),
     ('ERROR', r'\beval\s*\(|\bnew\s+Function\s*\(', '禁止动态执行代码'),
     ('ERROR', r'window\.open\s*\(|window\.prompt\s*\(', '禁止新窗口/prompt'),
     ('ERROR', r'requestFullscreen\s*\(', '禁止 requestFullscreen'),
     ('ERROR', r'navigator\.credentials|navigator\.locks|navigator\.storage\.persist', '禁止凭据/锁/持久化存储 API'),
     ('ERROR', r'\bwx\.[A-Za-z_$]', '目标产物仍包含 wx.*，说明微信宿主 API 未清理'),
     ('ERROR', r'(^|[^\w$])(?:App|Page|Component)\s*\(\s*\{', '目标产物疑似仍包含微信 App/Page/Component 注册模型'),
+]
+
+# 交付代码必须运行在 Android 8.1 出厂 Chrome/WebView 61（ES2017）。
+# 以下为 ES2018+ 语法残留检查（字符串/注释中可能出现误报，需人工复核）。
+ES2018_SYNTAX_CHECKS = [
+    ('ERROR', r'\?\.', '发现可选链 ?.（ES2020）；Chrome 61 不支持，构建期须转译为 ES2017'),
+    ('ERROR', r'\?\?', '发现空值合并 ??（ES2020）；Chrome 61 不支持，构建期须转译'),
+    ('ERROR', r'(?:\?\?|&&|\|\|)=', '发现逻辑赋值运算符（ES2021）；Chrome 61 不支持'),
+    ('ERROR', r'\bglobalThis\b', '发现 globalThis（ES2020）；Chrome 61 不支持，改用 window'),
+    ('ERROR', r'\b\d[\d_]*n\b(?=\s*[,;)+\]}]|\s*$)', '疑似 BigInt 字面量（ES2020）；Chrome 61 不支持'),
+    ('ERROR', r'\b\d[\d_]*_\d[\d_]*\b', '发现数字分隔符（ES2021）；Chrome 61 不支持'),
+    ('ERROR', r'\bObject\.(?:fromEntries|hasOwn)\b|\bArray\.prototype\.flat|\.flat\s*\(\s*\)|\.flatMap\s*\(', '发现 ES2019+ 内置方法；Chrome 61 不支持，需 polyfill'),
+    ('ERROR', r'\.(?:trimStart|trimEnd)\s*\(|\bString\.prototype\.matchAll|\.matchAll\s*\(', '发现 ES2019/ES2020 字符串方法；Chrome 61 不支持，需 polyfill'),
 ]
 
 REMOTE_URL_RE = re.compile(r'https?://[^\s"\'<>`)}\]]+', re.I)
@@ -183,12 +213,23 @@ def main():
                     add('WARNING', rel, '发现 Node.js 环境变量/路径符号；确认已在构建期替换')
                 if re.search(r'\b(?:location\.href\s*=|location\.(?:assign|replace)\s*\()', text):
                     add('ERROR', rel, '禁止页面跳转/站外导航；MiniTool 应保持单入口 SPA')
-                for m in re.finditer(r'(?:window\.)?xhs\.miniTool\.([A-Za-z_$][\w$]*)', text):
+                xhs_apis_used = set()
+                for m in re.finditer(r'miniTool\s*(?:\?\.|\.)\s*([A-Za-z_$][\w$]*)', text):
                     api = m.group(1)
+                    xhs_apis_used.add(api)
                     if api not in XHS_ALLOWED_APIS:
                         add('ERROR', rel, f'当前官方未确认的 MiniTool Native API：{api}')
+                gated_used = {a for a in xhs_apis_used if a in XHS_VERSION_GATED_APIS}
+                if not gated_used:
+                    # 兼容 var mt = window.xhs.miniTool 之类的别名调用：按方法名裸匹配做 WARNING 级提示
+                    gated_used = {a for a in XHS_VERSION_GATED_APIS if re.search(r'[\.?&|(]\s*' + a + r'\s*\(', text)}
+                if gated_used and not re.search(r'getLaunchOptions|buildVersion', text):
+                    add('WARNING', rel, f'疑似使用了版本门槛 API {sorted(gated_used)}，但本文件未见 getLaunchOptions/buildVersion 版本探测；请确认调用链上游已做版本门槛与降级')
                 if 'window.xhs.miniTool' in text and not re.search(r'window\.xhs\?|window\.xhs\s*&&|global\.xhs', text):
                     add('WARNING', rel, '直接访问 window.xhs.miniTool；普通浏览器环境可能 undefined，建议包装判空')
+                for level, pattern, msg in ES2018_SYNTAX_CHECKS:
+                    if re.search(pattern, text):
+                        add(level, rel, msg)
                 for m in JS_LITERAL_ASSET_RE.finditer(text):
                     ref = m.group(1)
                     target = resolve_local_ref(p, ref)

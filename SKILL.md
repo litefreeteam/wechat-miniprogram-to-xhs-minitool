@@ -4,13 +4,15 @@ description: >-
   将原生微信小程序（WXML/WXSS/JS/TS/JSON）、微信小游戏（Canvas/WebGL）或可输出 H5 的跨端项目迁移为
   小红书 MiniTool 小工具离线 H5 ZIP。采用“最大可用”原则：优先保留用户目标，通过标准 Web 等价、XHS Bridge、
   OSS/CDN 本地化、构建期快照/预计算、本地数据模拟、手动输入替代、产品语义重写与可探测 Web 增强尽量保住功能；
-  只有原语义确实依赖小红书明确禁用能力时才 HARD_BLOCK。最终必须断网自包含、只使用官方当前 3 个 Native API、
+  只有原语义确实依赖小红书明确禁用能力时才 HARD_BLOCK。最终必须断网自包含、只使用官方当前公布的 Native API
+  （含版本门槛：Storage 9.46+、文件系统/interactionOpenApi 9.49+）、代码降级到 ES2017/Chrome 61、
   严格验包，不伪造登录/支付/实时服务端/平台身份。
 metadata:
-  version: "1.0.0"
-  revision_date: "2026-08-20"
+  version: "1.1.0"
+  revision_date: "2026-09-29"
   strategy: "maximum-availability"
-  xhs_capability_baseline: "2026-08-11"
+  xhs_capability_baseline: "2026-09-29"
+  xhs_doc_url: "https://miniapp-sandbox.xiaohongshu.com/minitool/doc"
   wechat_api_baseline: "miniprogram-api-typings 5.2.2 / API definitions 3.17.0"
 ---
 
@@ -36,19 +38,38 @@ metadata:
 
 按以下优先级做判断：
 
-1. 用户提供/当前最新的小红书官方《小工具容器 · 能力清单》；本 Skill 基线为 **2026-08-11**。
+1. 小红书官方 MiniTool 文档 `https://miniapp-sandbox.xiaohongshu.com/minitool/doc`；本 Skill 基线为 **2026-09-29**。
 2. `references/xhs-current-capabilities.md`。
 3. `references/wechat-to-xhs-capability-matrix.md`。
 4. 本 Skill 其他 reference、脚本与模板。
 5. 历史 Skill/第三方资料仅可补充，不可覆盖官方禁用项。
 
-当前官方明确的 XHS Native API 只有：
+官方上传页还提供一段标准化“改写口令”（提示词），用于驱动 AI 拉取官方 skill kit、执行语法降级、合规校验、修复与打包。**该口令不能由本 Skill 代替**；正式发布前应同时在官方上传页流程中跑一遍。本 Skill 的迁移策略与官方口令是互补关系：本 Skill 负责“微信语义 → 最大可用 Web/端能力”的产品级迁移，官方口令负责最终交付前的容器合规校验。
 
-- `postNote`
-- `saveImageToPhotosAlbum`
-- `writeTempFile`
+## 当前官方 XHS Native API 全量清单（挂载于 `window.xhs.miniTool`）
 
-不得调用未列出的 Native API，不得绕过 SDK 直接向 bridge 发消息。
+无版本门槛（基线即有）：
+
+- `postNote` — 唤起笔记发布页（标题 ≤20 字、正文 ≤1000 字、图 1–18 张或单视频；实况照片 `live_photo_sources` 需客户端 9.43+）
+- `saveImageToPhotosAlbum` — 保存图片到相册（用户手势触发）
+- `writeTempFile` — base64 → 容器临时文件（png/jpeg/webp/gif/mp4）
+- `getLaunchOptions` — 启动参数与客户端版本探测（`miniToolEnv.buildVersion`、`miniToolEnv.userDataPath`）
+
+客户端 **9.46.0+**（`Math.floor(buildVersion / 1000) >= 9460`）：
+
+- `setStorage` / `getStorage` / `getStorageInfo` / `removeStorage` / `clearStorage` — 容器级缓存（单 key ≤1MB、总量 ≤10MB、data 必须是 JSON 字符串、可选 encrypt）
+
+客户端 **9.49.0+**（`>= 9490`）：
+
+- `saveFile` / `writeFile` / `appendFile` / `readFile` / `readDir` / `statFile` / `unlink` / `mkdir` / `getFileStorageInfo` — 沙箱文件系统（根目录取 `launchOptions.miniToolEnv.userDataPath`，分片按 `getFileStorageInfo` 返回的 chunk 上限）
+- `interactionOpenApi` — 发布评论（`payload.action: "post_comment"`，仅图片媒体，`miniToolSnapshotInfo` ≤2KB）
+
+规则：
+
+- 不得调用未列出的 Native API，不得绕过 SDK 直接向 bridge 发消息；
+- 未声明字段会被 SDK/Native 双层 Schema 校验**静默丢弃**，不要传文档表格之外的字段；
+- 9.46+/9.49+ 的 API 必须先用 `getLaunchOptions` 做版本探测 + `typeof fn === 'function'` 双重判断，并提供浏览器存储等降级路径；
+- 非小红书环境调试时 `window.xhs` 为 `undefined` 属预期，必须判空防护。
 
 微信 API 基线使用 `wechat-miniprogram/api-typings` 的 `miniprogram-api-typings 5.2.2`，其 2026-07-27 changelog 对应 API definitions 3.17.0。
 
@@ -66,7 +87,7 @@ metadata:
    改 API / DOM / Canvas / SPA / Storage 模型后可完成
         ↓ 否
 3. XHS BRIDGE
-   postNote / saveImageToPhotosAlbum / writeTempFile 是否能保住目标
+   postNote / saveImageToPhotosAlbum / writeTempFile / Storage(9.46+) / 文件系统(9.49+) / interactionOpenApi(9.49+) 是否能保住目标
         ↓ 否
 4. LOCALIZE
    远程静态图片/字体/固定文件能否在迁移阶段放进 ZIP
@@ -78,7 +99,7 @@ metadata:
    WASM/Worker/在线处理是否输入有限，可构建期提前算好/转码/解压
         ↓ 否
 7. EMULATE_LOCAL
-   账号/云存档/CRUD 是否只为本机体验，可改本地 installId + IndexedDB
+   账号/云存档/CRUD 是否只为本机体验，可改本地 installId + XHS Storage/文件系统（旧客户端降级 IndexedDB）
         ↓ 否
 8. PRODUCT_REWRITE
    能否换一种交互达到相近用户目标：定位→手动城市；广告→任务解锁；分享→postNote
@@ -96,13 +117,25 @@ metadata:
 
 # 2. 三层 Web 能力模型
 
+### 0. 兼容基线（全局硬约束）
+
+- 容器基线为 **Android 8.1 出厂 Chrome/WebView 61** 与 iOS WKWebView；最终交付代码必须编译/降级到 **ES2017 / Chrome 61** 可运行；
+- 禁止交付包含可选链 `?.`、空值合并 `??`、class 字段、`BigInt`、`globalThis`、逻辑赋值 `??=/&&=/||=`、数字分隔符等 ES2018+ 语法（除非构建期已转译）；
+- 用到较新 CSS/JS 特性必须 feature-detect 并提供降级分支；
+- **禁止内联 `<script>` 与行内事件属性**（`onclick=` 等），JS 必须外置为包内 `.js` 并用 `addEventListener` 绑定。
+
 ### A. 官方明确支持
 
-可以进入主流程：HTML/CSS/JS、Canvas 2D、纯 WebGL、`getUserMedia` 摄像头/麦克风、图片/视频选择、`<audio>/<video>` 播放、localStorage/sessionStorage/IndexedDB/Cookie/Cache、`alert/confirm` 等。
+可以进入主流程：HTML/CSS/JS、Canvas 2D、纯 WebGL/WebGL2、`getUserMedia` 摄像头/麦克风（需系统授权弹窗）、`<audio>/<video>` 内联播放、`alert/confirm` 原生对话框、文本选择、包内图片与 `data:`/`blob:` 图像。
+
+- `<input type=file>`：**无论 accept 如何设置，系统选择器只放行图片/视频**，不能用于任取任意类型文件；
+- 数据存储：**首选容器级 XHS Storage（9.46+）与文件系统（9.49+）**；浏览器内置存储（localStorage/sessionStorage/IndexedDB/Cookie/Cache）降级为“未满足版本条件时的兼容兜底”，**不承诺生命周期**，使用它们时必须自建容错与迁移逻辑（首次进入时尝试从浏览器存储迁移到容器 Storage）。
 
 ### B. 官方明确禁用
 
-不能调用，不能探测后强行绕过：网络请求、WebSocket/SSE/WebRTC、Geolocation、Clipboard、蓝牙/USB/HID/串口、DeviceMotion/Orientation、Worker 系、WASM、`eval/new Function`、iframe/object、文件下载、外链、新窗口、跨小工具、支付/推送等。
+不能调用，不能探测后强行绕过：网络请求（fetch/XMLHttpRequest/任意联网）、WebSocket/SSE/WebRTC、Geolocation、Clipboard、蓝牙/USB/HID/串口、DeviceMotion/Orientation/传感器阵列、Worker/SharedWorker/ServiceWorker、WASM、`eval/new Function`、iframe/object、OffscreenCanvas/SharedArrayBuffer、表单跳转提交、文件下载、外链、新窗口（window.open/prompt）、跨小工具路由、长按菜单、支付/系统推送/NFC/MIDI/XR/PWA/后台同步等。
+
+WebGL 边界：允许纯本地像素渲染管线；**禁止把外部域贴图载入纹理**；依赖 WASM 的图形/推理管线、重度 AI 推理场景无法部署。
 
 ### C. 标准 Web 但官方未逐项承诺
 
@@ -209,7 +242,7 @@ python3 scripts/materialize_static_json.py ./config.json \
 - 纯计算/格式化/规则引擎 → 移到客户端纯 JS；
 - 固定读取 → SNAPSHOT；
 - 固定素材 → LOCALIZE；
-- 简单 CRUD/进度/收藏 → IndexedDB/localStorage 本地化；
+- 简单 CRUD/进度/收藏 → XHS Storage（9.46+）/文件系统（9.49+），旧客户端降级 IndexedDB/localStorage；
 - 上传后只为生成分享图 → 本地 File/Canvas + XHS 保存/发笔记；
 - 私密密钥、真实鉴权、跨设备同步、动态服务端计算 → HARD_BLOCK。
 
@@ -243,8 +276,8 @@ python3 scripts/materialize_static_json.py ./config.json \
 典型策略：
 
 - 登录只用于本机进度 → `MiniCompat.identity` 本地 installId；明确不是平台账号。
-- 用户昵称头像 → 本地文本输入 + `<input type=file>`。
-- 云存档 → IndexedDB/localStorage；提示“仅本机”。
+- 用户昵称头像 → 本地文本输入 + `<input type=file>`（注意：容器只放行图片/视频选择）。
+- 云存档 → **优先 XHS Storage（9.46+）/文件系统（9.49+）**，浏览器 IndexedDB/localStorage 仅作旧客户端兜底且不承诺生命周期；提示“仅本机”。
 - 排行榜 → 本机最好成绩 / 预置挑战目标；不要伪造在线排行。
 - 广告奖励 → 本地任务、冷却、积分、成就或直接开放。
 - 定位 → 手动城市/区域/POI 选择 + 本地数据。
@@ -254,6 +287,7 @@ python3 scripts/materialize_static_json.py ./config.json \
 - Worker → 主线程分片；重计算有限集合时 PRECOMPUTE。
 - WASM 解码/压缩纹理 → 构建期转普通 PNG/WebP/未压缩模型；动态模型推理才 HARD_BLOCK。
 - 微信分享 → 产品目标合适时生成媒体 + `postNote`，不是 API 等价替换。
+- 微信评论/留言类交互 → 9.49+ 可用 `interactionOpenApi`（`action: "post_comment"`）唤起小红书发布评论视图；旧客户端降级为本地展示。
 
 ## Phase 6.5 — MiniTool 原生壳层与 Picker 交互（强制）
 
@@ -360,7 +394,8 @@ python3 scripts/embed_media_as_js.py ./tap.mp3 \
 
 开发期可 Vite/Rollup/Webpack，但最终必须：
 
-- classic local JS；
+- classic local JS，**编译目标 ES2017 / Chrome 61**（Android 8.1 出厂 WebView 基线）；
+- 无 ES2018+ 运行时语法残留（可选链 `?.`、空值合并 `??`、class 字段、逻辑赋值等须转译）；
 - 无 runtime module/dynamic chunk；
 - 无未处理 CommonJS；
 - 无 CDN；
@@ -427,12 +462,13 @@ validator 是目标产物的硬边界：最大可用策略只发生在迁移阶�
 - 远程静态素材已本地化；
 - 固定服务端数据已快照/预计算；
 - 可转纯 JS 的云函数已迁；
-- 本地个性化/进度使用 Storage/IndexedDB；
+- 本地个性化/进度优先使用 XHS Storage/文件系统（带版本探测），浏览器 Storage/IndexedDB 仅作旧客户端兜底；
 - HARD_BLOCK 已逐项决定“删除/产品重写/明确缺失”；
 - PROBE 能力都有 fallback；
 - 不残留 `wx.*`、微信 App/Page/Component 运行时；
-- 无外部 URL、网络、WASM、Worker、eval、iframe、外链、文件下载；
-- 只使用 3 个当前官方 XHS Native API；
+- 无外部 URL、网络、WASM、Worker、eval、iframe、外链、文件下载、行内脚本/行内事件属性；
+- 只使用官方公布的 XHS Native API，9.46+/9.49+ API 均有版本探测与降级；
+- 交付 JS 已降级到 ES2017/Chrome 61 语法；
 - 根目录只有一个 `index.html`；
 - 资源引用真实存在；
 - MiniTool 页面内无重复左上角返回键；微信自绘宿主导航已移除或内容化；
@@ -453,5 +489,5 @@ validator 是目标产物的硬边界：最大可用策略只发生在迁移阶�
 - `references/static-data-migration.md`：服务端固定数据离线化
 - `references/framework-conversion.md`：WXML/Page/Canvas/SPA
 - `references/edge-cases.md`：依赖/分包/WXS/媒体等边界
-- `references/xhs-jsbridge.md`：3 个 Native API
+- `references/xhs-jsbridge.md`：Native API 全量清单与版本门槛
 - `references/source-provenance.md`：资料来源与版本

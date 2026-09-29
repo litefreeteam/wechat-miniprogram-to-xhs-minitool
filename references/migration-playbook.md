@@ -42,7 +42,7 @@ WXML → DOM，WXSS → CSS，Page/Component → controller，微信多页 → S
 
 ## Step 6：平台能力重写
 
-优先：Storage、File/Blob、Canvas、getUserMedia、postNote/saveImage/writeTempFile、手动输入、本地选择器、产品语义重写。
+优先：XHS Storage(9.46+)/文件系统(9.49+)、浏览器 Storage 兜底、File/Blob、Canvas、getUserMedia、postNote/saveImage/writeTempFile、interactionOpenApi(9.49+ 评论)、手动输入、本地选择器、产品语义重写。
 
 ## Step 7：PROBE 增强
 
@@ -50,7 +50,7 @@ WXML → DOM，WXSS → CSS，Page/Component → controller，微信多页 → S
 
 ## Step 8：构建/依赖收敛
 
-最终 classic local JS，无网络/eval/WASM/Worker/runtime module/CDN。
+最终 classic local JS，**编译目标 ES2017 / Chrome 61**，无网络/eval/WASM/Worker/runtime module/CDN/内联脚本/行内事件属性。
 
 ## Step 9：严格验包
 

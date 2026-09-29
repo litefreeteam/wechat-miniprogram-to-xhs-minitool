@@ -37,9 +37,9 @@
 
 | 微信 | 状态 | 处理 |
 |---|---:|---|
-| storage sync | PRESERVE | localStorage |
-| 大对象/查询 | ADAPT | IndexedDB |
-| FileSystemManager | ADAPT | 按用途拆 File/Blob/IDB/writeTempFile |
+| storage sync | ADAPT | 优先 XHS `setStorage/getStorage`（9.46+，data 为 JSON 字符串）；旧客户端降级 localStorage（弱兼容兜底，须容错） |
+| 大对象/查询 | ADAPT | XHS Storage 单 key ≤1MB、总量 ≤10MB，超限拆分；或 9.49+ 文件系统落盘；IndexedDB 仅旧客户端兜底 |
+| FileSystemManager | ADAPT | 9.49+ 用 XHS 文件系统（readFile/writeFile/mkdir 等，根目录 userDataPath）；旧客户端按用途拆 File/Blob/IDB/writeTempFile |
 | `openDocument` 固定文档 | PRECOMPUTE | 构建期转 HTML/图片 |
 | 任意文件下载 | HARD_BLOCK | 浏览器下载明确禁用 |
 
@@ -87,6 +87,7 @@
 | 微信 | 状态 | 处理 |
 |---|---:|---|
 | onShareAppMessage/showShareMenu | PRODUCT_REWRITE | 生成媒体 + postNote（语义合适时） |
+| 评论/留言类交互 | ADAPT | 9.49+ 用 interactionOpenApi（action: "post_comment"）唤起小红书发评论；旧客户端本地展示 |
 | 微信好友/群/朋友圈原语义 | HARD_BLOCK | XHS MiniTool 无等价 |
 | navigateToMiniProgram/launchApp | HARD_BLOCK | 禁止跨工具/站外 |
 | 客服 contact | PRODUCT_REWRITE | 本地帮助/FAQ；真实客服会话不可 |
