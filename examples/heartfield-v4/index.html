@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f8f5f1">
+  <meta name="description" content="情侣同屏接力2.5D扫雷游戏，支持小红书评论区同题PK与战报。">
+  <title>心动雷区 · 带 TA 逃出去</title>
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand-lockup">
+        <span class="brand-mark" aria-hidden="true">♥</span>
+        <span class="brand-text"><strong>HEARTFIELD</strong><small>心动研究所 · VOL.02</small></span>
+      </div>
+      <div class="top-actions">
+        <button type="button" id="motionBtn" class="icon-button hidden" aria-label="开启场景体感" title="场景体感特效">◈</button>
+        <button type="button" id="soundBtn" class="icon-button" aria-label="切换音效">♪</button>
+        <button type="button" id="helpBtn" class="icon-button help-button" aria-label="玩法说明">?</button>
+      </div>
+    </header>
+
+    <main>
+      <section id="homeScreen" class="screen">
+        <div class="home-heading">
+          <p class="eyebrow"><span class="small-sparkle">✦</span> A TWO-PLAYER LITTLE ADVENTURE</p>
+          <h1>心动<span>雷区</span><i>♥</i></h1>
+          <p class="tagline">从绿色起点走到金色终点，两个人一起逃出去。</p>
+        </div>
+        <div class="hero-scene" aria-label="立体扫雷游戏预览">
+          <div class="hero-sash" id="heroSash">2.5D · 落日海岸</div>
+          <canvas id="heroCanvas" aria-hidden="true"></canvas>
+          <div class="hero-caption"><span>两个人 · 一张地图 · 无数个心动瞬间</span><span>↗</span></div>
+        </div>
+        <div class="form-card">
+          <div class="section-heading"><span>01</span><strong>今天谁来踩雷？</strong></div>
+          <div class="mode-picker" role="group" aria-label="选择游戏模式">
+            <button type="button" class="mode-card selected" data-mode="duo"><span class="mode-emoji">💞</span><strong>情侣接力</strong><small>两人结伴 · 轮流走一步</small></button>
+            <button type="button" class="mode-card" data-mode="solo"><span class="mode-emoji">🧭</span><strong>单人冒险</strong><small>独自破解 · 抵达终点</small></button>
+          </div>
+          <div class="section-heading section-heading-gap"><span>02</span><strong>挑选冒险难度</strong></div>
+          <div class="difficulty-picker" role="group" aria-label="选择难度">
+            <button type="button" data-level="easy" class="difficulty-chip"><strong>初次约会</strong><small>6 × 6</small></button>
+            <button type="button" data-level="normal" class="difficulty-chip selected"><strong>心动挑战</strong><small>7 × 7</small></button>
+            <button type="button" data-level="hard" class="difficulty-chip"><strong>默契极限</strong><small>8 × 8</small></button>
+          </div>
+          <div class="section-heading section-heading-gap scene-heading"><span>03</span><strong>选一个心动场景</strong><small>每个地点都有不同氛围</small></div>
+          <div class="scene-picker" role="group" aria-label="选择游戏场景">
+            <button type="button" class="scene-option selected" data-scene="sunset"><span class="scene-icon">🌅</span><strong>落日海岸</strong><small>海浪 · 贝壳</small></button>
+            <button type="button" class="scene-option" data-scene="sakura"><span class="scene-icon">🌸</span><strong>樱花公园</strong><small>飘花 · 心愿</small></button>
+            <button type="button" class="scene-option" data-scene="starlight"><span class="scene-icon">🌙</span><strong>星河露营</strong><small>篝火 · 流星</small></button>
+          </div>
+          <div class="people-edit">
+            <label class="person-form" for="nameOne"><span class="form-avatar coral" id="avatarOnePreview">A</span><span class="name-input-wrap"><small>玩家 A</small><input id="nameOne" type="text" maxlength="6" value="小满" placeholder="你的昵称" autocomplete="off"></span><span class="photo-badge">＋照片</span><input class="photo-input" id="photoOne" type="file" accept="image/*" aria-label="上传玩家A照片"></label>
+            <div class="ampersand">&</div>
+            <label class="person-form" for="nameTwo"><span class="form-avatar mint" id="avatarTwoPreview">B</span><span class="name-input-wrap"><small>玩家 B</small><input id="nameTwo" type="text" maxlength="6" value="阿野" placeholder="TA的昵称" autocomplete="off"></span><span class="photo-badge">＋照片</span><input class="photo-input" id="photoTwo" type="file" accept="image/*" aria-label="上传玩家B照片"></label>
+          </div>
+          <p class="photo-tip">可选：点击「＋照片」换成真人头像，图片只在当前设备处理。</p>
+          <div class="code-row"><label for="challengeCode">同题挑战码 <span>（选填）</span></label><input id="challengeCode" type="text" maxlength="8" placeholder="例如 LOVE68" autocomplete="off" autocapitalize="characters"><button type="button" id="randomCodeBtn" aria-label="随机生成挑战码">↻</button></div>
+          <button type="button" class="primary-button start-button" id="startBtn">一起出发 <span>↗</span></button>
+          <div class="home-extras"><button type="button" id="resumeBtn" class="secondary-feature hidden">↺ 继续上次冒险</button><button type="button" id="historyBtn" class="secondary-feature">✧ 我的情侣战绩</button></div>
+          <p id="storageHint" class="storage-hint hidden" role="status"></p>
+          <div class="follow-panel hidden" id="followPanel" aria-label="关注游戏作者">
+            <span>♡ 喜欢这种有脑洞的小游戏？</span>
+            <button type="button" id="followBtn">＋ 关注作者</button>
+          </div>
+          <p class="micro-tip">左下角出发 → 右上角终点 · 每次只能走相邻一格</p>
+        </div>
+      </section>
+
+      <section id="playScreen" class="screen hidden" aria-label="游戏">
+        <div class="game-title-row">
+          <div><p class="eyebrow" id="gameChapter">CHAPTER 01 · SUNSET COAST</p><h2 id="gameHeading">带 TA 逃出雷区</h2></div>
+          <button type="button" class="subtle-button" id="backHomeBtn">⌂ 返回</button>
+        </div>
+        <div class="stats-bar">
+          <div><small>距离终点</small><strong id="safeCount">--</strong></div>
+          <div><small>已插旗</small><strong id="mineCount">--</strong></div>
+          <div><small>守护爱心</small><strong id="heartCount" class="heart-text">♥ ♥ ♥</strong></div>
+          <div><small>用时</small><strong id="timeCount">00:00</strong></div>
+        </div>
+        <div class="route-banner" aria-live="polite">
+          <span class="route-goal-icon">🚩</span>
+          <div class="route-banner-content"><strong>任务：两人一起走到右上角的金色终点</strong><small>只能走人物身边发光的四个格子 · 数字提示附近的雷</small></div>
+          <span id="routeStep" class="route-step">第 1 步</span>
+        </div>
+        <div class="play-scene-wrap" id="playSceneWrap">
+          <div class="scene-topline"><span class="scene-pill" id="scenePill">✦ 落日海岸</span><span id="sceneInstruction">绿色起点在左下，金色终点在右上</span></div>
+          <canvas id="gameCanvas" aria-label="立体扫雷棋盘，点击格子翻开或插旗"></canvas>
+          <div class="scene-bottomline"><span id="statusLine">数字 = 相邻八格的雷数</span><span id="comboPill" class="combo-pill">默契 0</span></div>
+        </div>
+        <div class="story-track" aria-label="约会冒险进度">
+          <div class="story-track-top"><span id="storyStageTitle">♡ 约会序章 · 初见</span><span id="rescueCount">紧急救援 2 次</span></div>
+          <div class="story-progress"><span id="storyProgressFill"></span></div>
+          <p id="storyStageDetail">每向终点走近一步，冒险就更进一步。</p>
+        </div>
+        <div class="player-strip" id="playerStrip">
+          <button type="button" id="playerOneBtn" class="player-card active" aria-label="切换到玩家A"><span id="playerOneAvatar" class="mini-avatar peach">A</span><span class="player-card-meta"><strong id="playerOneName">小满</strong><small id="playerOneSub">正在探路 · 玩家 A</small></span><span class="turn-indicator">●</span></button>
+          <div class="handover">⇄</div>
+          <button type="button" id="playerTwoBtn" class="player-card" aria-label="切换到玩家B"><span id="playerTwoAvatar" class="mini-avatar seafoam">B</span><span class="player-card-meta"><strong id="playerTwoName">阿野</strong><small id="playerTwoSub">准备接力 · 玩家 B</small></span><span class="turn-indicator">●</span></button>
+        </div>
+        <div class="controls-card">
+          <div class="control-head"><strong>轮到谁带队？</strong><small id="turnText">轮到小满啦！</small></div>
+          <div class="action-row" role="group" aria-label="扫雷行动方式">
+            <button type="button" class="action-btn selected" id="digBtn"><span>👣</span><strong>探索格子</strong><small>点发光相邻格</small></button>
+            <button type="button" class="action-btn" id="flagBtn"><span>🚩</span><strong>标记地雷</strong><small>长按也可以</small></button>
+            <button type="button" class="action-btn" id="radarBtn"><span>🔎</span><strong>心动雷达</strong><small id="radarCount">剩余 2 次</small></button>
+            <button type="button" class="action-btn" id="shieldBtn"><span>🛡</span><strong>爱的守护</strong><small id="shieldCount">剩余 2 次</small></button>
+          </div>
+          <div class="game-actions"><button type="button" id="restartBtn">↻ 重新开局</button><button type="button" id="shareCodeBtn">⌗ 分享挑战码</button><button type="button" id="encourageBtn">♥ 给 TA 打气</button></div>
+        </div>
+        <div class="message-card"><span class="message-icon">✉</span><span><strong id="messageTitle">搭档情报</strong><small id="messageDetail">发现特殊心愿格，会解锁你们的默契小问题。</small></span></div>
+      </section>
+    </main>
+    <footer class="footnote">HEARTFIELD · 把每一步走成属于你们的故事</footer>
+  </div>
+
+  <div id="modalRoot" class="modal-root hidden" role="presentation">
+    <div class="modal-backdrop"></div>
+    <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div id="modalIcon" class="modal-icon">♥</div>
+      <p id="modalEyebrow" class="modal-eyebrow">LITTLE SURPRISE</p>
+      <h3 id="modalTitle">心动时刻</h3>
+      <p id="modalDesc" class="modal-desc"></p>
+      <div id="modalExtra" class="modal-extra"></div>
+      <div id="modalButtons" class="modal-buttons"></div>
+    </div>
+  </div>
+  <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
+  <script src="./xhs-adapter.js" defer></script>
+  <script src="./game.js" defer></script>
+</body>
+</html>
