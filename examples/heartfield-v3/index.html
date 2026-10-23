@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#f8f5f1">
+  <meta name="description" content="情侣同屏接力2.5D扫雷游戏，支持小红书评论区同题PK与战报。">
   <title>心动雷区 · 双人冒险</title>
   <link rel="stylesheet" href="./style.css">
 </head>
@@ -15,6 +16,7 @@
         <span class="brand-text"><strong>HEARTFIELD</strong><small>心动研究所 · VOL.02</small></span>
       </div>
       <div class="top-actions">
+        <button type="button" id="motionBtn" class="icon-button hidden" aria-label="开启场景体感" title="场景体感特效">◈</button>
         <button type="button" id="soundBtn" class="icon-button" aria-label="切换音效">♪</button>
         <button type="button" id="helpBtn" class="icon-button help-button" aria-label="玩法说明">?</button>
       </div>
@@ -58,6 +60,8 @@
           <p class="photo-tip">可选：点击「＋照片」换成真人头像，图片只在当前设备处理。</p>
           <div class="code-row"><label for="challengeCode">同题挑战码 <span>（选填）</span></label><input id="challengeCode" type="text" maxlength="8" placeholder="例如 LOVE68" autocomplete="off" autocapitalize="characters"><button type="button" id="randomCodeBtn" aria-label="随机生成挑战码">↻</button></div>
           <button type="button" class="primary-button start-button" id="startBtn">一起出发 <span>↗</span></button>
+          <div class="home-extras"><button type="button" id="resumeBtn" class="secondary-feature hidden">↺ 继续上次冒险</button><button type="button" id="historyBtn" class="secondary-feature">✧ 我的情侣战绩</button></div>
+          <p id="storageHint" class="storage-hint hidden" role="status"></p>
           <div class="follow-panel hidden" id="followPanel" aria-label="关注游戏作者">
             <span>♡ 喜欢这种有脑洞的小游戏？</span>
             <button type="button" id="followBtn">＋ 关注作者</button>
@@ -120,6 +124,7 @@
     </div>
   </div>
   <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
+  <script src="./xhs-adapter.js" defer></script>
   <script src="./game.js" defer></script>
 </body>
 </html>
